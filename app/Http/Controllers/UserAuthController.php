@@ -13,15 +13,22 @@ class UserAuthController extends Controller
         $registerUserData = $request->validate([
             'name'=>'required|string',
             'email'=>'required|string|email|unique:users',
+            'role_id'=>'required|integer',
             'password'=>'required|min:8'
         ]);
         $user = User::create([
             'name' => $registerUserData['name'],
             'email' => $registerUserData['email'],
+            'role_id' => $registerUserData['role_id'],
             'password' => Hash::make($registerUserData['password']),
         ]);
         return response()->json([
             'message' => 'User Created ',
+            'data' => [
+                'name' => $registerUserData['name'],
+                'email' => $registerUserData['email'],
+                'role' => $user->role()
+            ]
         ]);
     }
 
@@ -39,6 +46,11 @@ class UserAuthController extends Controller
         $token = $user->createToken($user->name.'-AuthToken')->plainTextToken;
         return response()->json([
             'access_token' => $token,
+            'data' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role->role
+            ]
         ]);
     }
 
